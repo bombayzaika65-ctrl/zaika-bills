@@ -41,6 +41,7 @@ nav button.on{color:var(--ac);font-weight:700}
 #ov img{width:100%;max-width:640px;display:block;margin:10px auto;border:1px solid var(--bd);background:#fff}
 .bt{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:640px;margin:auto}
 #sg{position:absolute;left:0;right:0;top:100%;z-index:5;background:var(--card);border:1px solid var(--bd);border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.3);max-height:230px;overflow:auto}#sg div{padding:12px;border-bottom:1px solid var(--bd)}
+.tag{font-size:11px;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle;color:#fff}.tag.pk{background:#2e7d5b}.tag.dl{background:#A11D21}
 #ts{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:20px;z-index:20;font-size:14px}
 @media print{@page{size:A4;margin:0}body>*:not(#ov){display:none!important}#ov{position:static;padding:0}#ov>*:not(img){display:none!important}#ov img{border:0;margin:0;max-width:none;width:100%}}
 </style></head><body>
@@ -49,12 +50,12 @@ nav button.on{color:var(--ac);font-weight:700}
 <main>
 <section id="t0">
 <div class="card"><label>Customer name</label><div style="position:relative"><input id="cn" autocomplete="off"><div id="sg" hidden></div></div>
-<div class="r"><div><label>Date (delivery day)</label><input id="cd" type="date"></div><div><label>WhatsApp (with country code)</label><input id="cp" type="tel" placeholder="+98…"></div></div></div>
+<div class="r"><div><label>Date (delivery day)</label><input id="cd" type="date"></div><div><label>WhatsApp (with country code)</label><input id="cp" type="tel" placeholder="+98…"></div></div><label>Order type</label><select id="ot"><option value="d">Delivery</option><option value="p">Pick-up</option></select></div>
 <div class="card"><h3>Menu</h3><div class="chips" id="mb"></div></div>
 <div class="card"><h3>Items</h3><div id="il"></div>
 <label>Custom item</label><div class="r"><input id="cin" placeholder="Name" style="flex:2"><input id="ciq" inputmode="numeric" placeholder="Qty" style="max-width:64px"><input id="cip" inputmode="numeric" placeholder="Price"><button class="gd s" id="ca">Add</button></div></div>
 <div class="card"><label>Discount</label><div class="r"><select id="dt" class="s" style="width:110px"><option value="t">Toman</option><option value="p">%</option></select><input id="dv" inputmode="numeric" placeholder="0"></div>
-<label>Delivery charge</label><input id="dl" inputmode="numeric" placeholder="0"><label>Delivered by (gets the delivery charge; not on invoice)</label><select id="dm"></select>
+<div id="dbox"><label>Delivery charge</label><input id="dl" inputmode="numeric" placeholder="0"><label>Delivered by (gets the delivery charge; not on invoice)</label><select id="dm"></select></div>
 <label>Received</label><input id="rc" inputmode="numeric" placeholder="0"><label style="display:flex;align-items:center;gap:10px;font-size:17px;color:var(--tx);margin-top:10px"><input type="checkbox" id="pf" style="width:26px;height:26px;flex:none"> Paid in full</label></div>
 <div class="card" id="tot"></div>
 <button class="g" id="so" style="width:100%;margin-bottom:8px">Save as order (deliver later)</button><button class="b" id="pv">Preview invoice</button>
@@ -81,7 +82,7 @@ nav button.on{color:var(--ac);font-weight:700}
 <div class="bt"><button class="g" id="bp">Print / PDF</button><button class="g" id="bw">WhatsApp text</button>
 <button class="b" id="bsv">Save bill</button><button class="gd" id="bnw">New bill</button></div>
 <div id="hp" class="card" style="max-width:640px;margin:12px auto"><label>Add later payment (Toman)</label><div class="r"><input id="pa" inputmode="numeric"><button class="gd s" id="pb">Add payment</button></div>
-<label style="display:flex;align-items:center;gap:10px;font-size:17px;color:var(--tx);margin-top:12px"><input type="checkbox" id="pfh" style="width:26px;height:26px;flex:none"> Paid in full (adds the remaining balance)</label><button class="g" id="bd" style="width:100%;margin-top:10px">Delete bill</button></div>
+<label>Wrong amount? Correct the total received (Toman)</label><div class="r"><input id="ra" inputmode="numeric"><button class="g s" id="rb">Set</button></div><label style="display:flex;align-items:center;gap:10px;font-size:17px;color:var(--tx);margin-top:12px"><input type="checkbox" id="pfh" style="width:26px;height:26px;flex:none"> Paid in full (adds the remaining balance)</label><button class="g" id="bd" style="width:100%;margin-top:10px">Delete bill</button></div>
 </div>
 <div id="ts" hidden></div>
 <script>
@@ -146,7 +147,7 @@ T('Payment Details',112,bt+34,'bold 26px Arial','#fff');
 return c}
 function waText(b){const t=calc(b);return 'Bombay Zaika - Invoice #'+(b.no||S.next)+'\nDate: '+dmy(b.date)+'\nCustomer: '+(b.name||'-')+'\n\n'+b.items.map((i,k)=>(k+1)+'. '+i.n+' x'+i.q+' @ '+fmt(i.p)+' = '+fmt(i.q*i.p)).join('\n')+'\n\nSub total: '+fmt(t.sub)+'\nDiscount: '+fmt(t.dc)+'\nDelivery: '+fmt(b.del)+'\nTotal: '+fmt(t.total)+' Toman\nReceived: '+fmt(b.rec)+'\nBalance due: '+fmt(t.bal)+' Toman\n\nThank you!'}
 /* ---------- overlay ---------- */
-function openInv(b,m){cur=b;mode=m;$('ov').hidden=false;$('bsv').hidden=$('bnw').hidden=m!=='new';$('hp').hidden=m!=='hist';$('bsv').textContent=b.saved?'Saved ✓ (update)':'Save bill';$('bd').textContent='Delete bill';$('pa').value='';$('pfh').checked=calc(b).bal<=0;$('pfh').disabled=$('pfh').checked;refInv();$('ov').scrollTop=0}
+function openInv(b,m){cur=b;mode=m;$('ov').hidden=false;$('bsv').hidden=$('bnw').hidden=m!=='new';$('hp').hidden=m!=='hist';$('bsv').textContent=b.saved?'Saved ✓ (update)':'Save bill';$('bd').textContent='Delete bill';$('pa').value='';$('ra').value=b.rec;$('pfh').checked=calc(b).bal<=0;$('pfh').disabled=$('pfh').checked;refInv();$('ov').scrollTop=0}
 function refInv(){cv=cur.stmt?drawStmt(cur):draw(cur);$('pimg').src=cv.toDataURL('image/png')}
 $('oc').onclick=()=>{$('ov').hidden=true;tab(cur_tab)};
 $('bs').onclick=()=>cv.toBlob(async bl=>{const f=new File([bl],(cur.stmt?'statement-'+cur.name:'invoice-'+(cur.no||S.next))+'.png',{type:'image/png'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Invoice'});return}}catch(e){if(e.name==='AbortError')return}toast('Press and hold the image to save or share')},'image/png');
@@ -154,7 +155,8 @@ $('bp').onclick=()=>{refInv();window.print()};
 $('bw').onclick=()=>{const n=(cur.phone||'').replace(/\D/g,'').replace(/^00/,''),a=document.createElement('a');a.href='https://wa.me/'+n+'?text='+encodeURIComponent(cur.stmt?stText(cur):waText(cur));a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove()};
 $('bsv').onclick=()=>{if(!cur.items.length)return toast('Add at least one item');if(!cur.saved){cur.no=S.next++;cur.saved=true;S.bills.push(cur);S.orders=S.orders.filter(o=>o.oid!==cur.oid)}save();refInv();$('bsv').textContent='Saved ✓ (update)';toast('Saved as invoice #'+cur.no)};
 $('bnw').onclick=()=>{d=newDraft();loadForm();$('ov').hidden=true;tab(0)};
-const upf=()=>{$('pfh').checked=calc(cur).bal<=0;$('pfh').disabled=$('pfh').checked};
+const upf=()=>{$('ra').value=cur.rec;$('pfh').checked=calc(cur).bal<=0;$('pfh').disabled=$('pfh').checked};
+$('rb').onclick=()=>{cur.rec=num($('ra').value);cur.pif=false;save();refInv();upf();toast('Received amount corrected')};
 $('pb').onclick=()=>{const a=num($('pa').value);if(!a)return;cur.rec+=a;save();refInv();$('pa').value='';upf();toast('Payment added')};
 $('pfh').onchange=e=>{const t=calc(cur);if(e.target.checked&&t.bal>0){cur.rec+=t.bal;save();refInv();toast('Marked as paid in full')}upf()};
 $('bd').onclick=()=>{if($('bd').textContent!=='Delete bill'){S.bills=S.bills.filter(x=>x!==cur);save();$('ov').hidden=true;tab(cur_tab);toast('Deleted')}else{$('bd').textContent='Tap again to delete';setTimeout(()=>$('bd').textContent='Delete bill',3000)}};
@@ -166,7 +168,7 @@ function ri(i){d.items.splice(i,1);renderItems()}
 function addM(i){const m=S.menu[i],f=d.items.find(x=>x.n===m.n&&x.p===m.p);f?f.q++:d.items.push({n:m.n,q:1,p:m.p});renderItems()}
 function renderNew(){$('mb').innerHTML=S.menu.map((m,i)=>`<button class="chip" onclick="addM(${i})">${E(m.n)}<small>${fmt(m.p)}</small></button>`).join('')||'<small>No menu items yet.</small>';
 $('dm').innerHTML='<option value="">Select…</option>'+[...S.men,...(d.dm&&!S.men.includes(d.dm)?[d.dm]:[])].map(n=>`<option>${E(n)}</option>`).join('');$('dm').value=d.dm||'';renderItems()}
-function loadForm(){$('cn').value=d.name;$('cd').value=d.date;$('cp').value=d.phone;$('dt').value=d.dt;$('dv').value=d.dv||'';$('dl').value=d.del||'';$('rc').value=d.rec||'';$('pf').checked=!!d.pif;renderNew()}
+function loadForm(){$('cn').value=d.name;$('cd').value=d.date;$('cp').value=d.phone;$('dt').value=d.dt;$('dv').value=d.dv||'';$('dl').value=d.del||'';$('rc').value=d.rec||'';$('pf').checked=!!d.pif;$('ot').value=d.ot||'d';$('dbox').hidden=d.ot==='p';renderNew()}
 const names=()=>{const m={};[...S.bills,...S.orders].forEach(b=>{if(b.name&&b.name.trim())m[b.name.trim().toLowerCase()]=b.name.trim()});return Object.values(m)};
 function fillPh(f){const k=d.name.trim().toLowerCase();if(k&&(f||!d.phone)){const b=[...S.bills].reverse().find(b=>b.name.trim().toLowerCase()===k&&b.phone);if(b){d.phone=b.phone;$('cp').value=b.phone}}}
 let SG=[];
@@ -175,6 +177,7 @@ $('sg').onclick=e=>{const t=e.target.closest('div[data-i]');if(!t)return;const n
 document.addEventListener('click',e=>{if(!e.target.closest('#cn,#sg'))$('sg').hidden=true});
 $('cn').oninput=e=>{d.name=e.target.value;fillPh();sug()};$('cn').onfocus=sug;
 $('dm').onchange=e=>d.dm=e.target.value;
+$('ot').onchange=e=>{d.ot=e.target.value;if(d.ot==='p'){d.del=0;d.dm='';$('dl').value='';$('dm').value=''}$('dbox').hidden=d.ot==='p';updTot()};
 $('cd').oninput=e=>d.date=e.target.value||today();$('cp').oninput=e=>d.phone=e.target.value;
 $('dt').onchange=e=>{d.dt=e.target.value;updTot()};
 [['dv','dv'],['dl','del'],['rc','rec']].forEach(([i,k])=>$(i).oninput=e=>{d[k]=num(e.target.value);if(k==='rec'){d.pif=false;$('pf').checked=false}updTot()});
@@ -188,7 +191,7 @@ function renderHist(){const q=$('hs').value.trim().toLowerCase(),l=[...S.bills].
 $('hs').oninput=renderHist;
 function renderCust(){const m={};[...S.bills].forEach(b=>{const k=b.name.trim().toLowerCase(),c=m[k]||(m[k]={name:b.name||'Walk-in',n:0,tot:0,bal:0,bills:[]}),t=calc(b);c.name=b.name||c.name;c.n++;c.tot+=t.total;c.bal+=t.bal;c.bills.unshift(b)});
 CL=Object.values(m).sort((a,b)=>b.bal-a.bal);$('ct').innerHTML=`<small style="color:var(--mu)">Total owed to you</small><div style="font-size:26px;font-weight:700;color:var(--ac)">${fmt(CL.reduce((s,c)=>s+c.bal,0))} Toman</div>`;
-$('cl2').innerHTML=CL.map((c,i)=>`<div class="row" onclick="oc(${i})"><div class="gr"><b>${E(c.name)}</b><small>${c.n} bill${c.n>1?'s':''} · ordered ${fmt(c.tot)}</small></div><div class="rt ${c.bal>0?'due':'ok'}"><b>${c.bal>0?fmt(c.bal):'Paid'}</b></div></div>`+(i===ci?`<div class="card"><label>Rename customer (changes all their bills)</label><div class="r"><input id="rn" value="${E(c.name)}"><button class="gd s" onclick="rnc(${i})">Save name</button></div></div>`+(c.bills.some(b=>calc(b).bal>0)?`<button class="gd" style="width:100%;margin-bottom:8px" onclick="stm(${i})">Send statement of all unpaid bills</button>`:'')+c.bills.map(brow).join(''):'')).join('')}
+$('cl2').innerHTML=CL.map((c,i)=>`<div class="row" onclick="oc(${i})"><div class="gr"><b>${E(c.name)}</b><small>${c.n} bill${c.n>1?'s':''} · ordered ${fmt(c.tot)}</small></div><div class="rt ${c.bal>0?'due':'ok'}"><b>${c.bal>0?fmt(c.bal):'Paid'}</b></div></div>`+(i===ci?(c.bal>0?`<div class="card"><label>Receive payment (applied to the oldest unpaid bills first)</label><div class="r"><input id="cpa" inputmode="numeric" placeholder="Amount"><button class="gd s" onclick="cpay(${i})">Apply</button></div><label style="display:flex;align-items:center;gap:10px;font-size:17px;color:var(--tx);margin-top:10px"><input type="checkbox" id="cpf" style="width:26px;height:26px;flex:none" onchange="cclr(${i})"> Cleared in full (${fmt(c.bal)})</label></div>`:'')+`<div class="card"><label>Rename customer (changes all their bills)</label><div class="r"><input id="rn" value="${E(c.name)}"><button class="gd s" onclick="rnc(${i})">Save name</button></div></div>`+(c.bills.some(b=>calc(b).bal>0)?`<button class="gd" style="width:100%;margin-bottom:8px" onclick="stm(${i})">Send statement of all unpaid bills</button>`:'')+c.bills.map(brow).join(''):'')).join('')}
 function oc(i){ci=ci===i?-1:i;renderCust()}
 function renderMenu(){$('ml').innerHTML=S.menu.map((m,i)=>`<div class="mr"><input value="${E(m.n)}" onchange="mn(${i},this.value)"><input class="p" inputmode="numeric" value="${m.p}" onchange="mp(${i},this.value)"><button class="x" onclick="md(${i})">×</button></div>`).join('')}
 const mn=(i,v)=>{if(v.trim()){S.menu[i].n=v.trim();save()}},mp=(i,v)=>{S.menu[i].p=num(v);save()},md=i=>{S.menu.splice(i,1);save();renderMenu()};
@@ -198,9 +201,12 @@ $('brs').onclick=()=>{if($('brs').textContent!=='Restore backup'){try{const j=JS
 /* ---------- orders ---------- */
 $('so').onclick=()=>{if(!d.items.length)return toast('Add at least one item');if(!d.oid)d.oid=Date.now();const i=S.orders.findIndex(o=>o.oid===d.oid);i<0?S.orders.push(d):S.orders[i]=d;save();toast('Order saved - see Orders tab');d=newDraft();loadForm()};
 let od=-1;
-function renderOrders(){const l=[...S.orders].sort((a,b)=>a.date.localeCompare(b.date));$('ol').innerHTML=l.map(o=>`<div class="row"><div class="gr" onclick="lo(${o.oid})"><b>${E(o.name||'Walk-in')}</b><small>Deliver ${dmy(o.date)} · ${E(o.items.map(i=>i.q+'× '+i.n).join(', '))}</small></div><div class="rt"><b>${fmt(calc(o).total)}</b></div><button class="x" onclick="dro(${o.oid})">${od===o.oid?'Sure?':'×'}</button></div>`).join('')||'<p style="color:var(--mu)">No saved orders. On New bill, add the customer and items, then tap Save as order.</p>'}
+function renderOrders(){const l=[...S.orders].sort((a,b)=>a.date.localeCompare(b.date));$('ol').innerHTML=l.map(o=>`<div class="row"><div class="gr" onclick="lo(${o.oid})"><b>${E(o.name||'Walk-in')} <span class="tag ${o.ot==='p'?'pk':'dl'}">${o.ot==='p'?'PICK-UP':'DELIVERY'}</span></b><small>${o.ot==='p'?'Pick-up':'Deliver'} ${dmy(o.date)} · ${E(o.items.map(i=>i.q+'× '+i.n).join(', '))}</small></div><div class="rt"><b>${fmt(calc(o).total)}</b></div><button class="x" onclick="dro(${o.oid})">${od===o.oid?'Sure?':'×'}</button></div>`).join('')||'<p style="color:var(--mu)">No saved orders. On New bill, add the customer and items, then tap Save as order.</p>'}
 function lo(id){d=S.orders.find(o=>o.oid===id);loadForm();tab(0);toast('Order loaded - check it, then preview the invoice')}
 function dro(id){if(od===id){S.orders=S.orders.filter(o=>o.oid!==id);od=-1;save()}else od=id;renderOrders()}
+/* ---------- customer payment ---------- */
+function cpay(i){const a=num($('cpa').value);if(!a)return toast('Enter an amount');let left=a;CL[i].bills.filter(b=>calc(b).bal>0).sort((x,y)=>x.date.localeCompare(y.date)||x.no-y.no).forEach(b=>{const k=Math.min(left,calc(b).bal);b.rec+=k;left-=k});save();ci=-1;renderCust();toast(left>0?'Applied. '+fmt(left)+' was more than owed and was not used':'Payment applied')}
+function cclr(i){CL[i].bills.forEach(b=>{const k=calc(b).bal;if(k>0)b.rec+=k});save();ci=-1;renderCust();toast('All bills cleared')}
 /* ---------- rename customer ---------- */
 function rnc(i){const n=$('rn').value.trim(),k=CL[i].bills[0].name.trim().toLowerCase();if(!n)return toast('Enter a name');[...S.bills,...S.orders].forEach(b=>{if(b.name.trim().toLowerCase()===k)b.name=n});if(d.name.trim().toLowerCase()===k){d.name=n;$('cn').value=n}save();ci=-1;renderCust();toast('Name changed on all bills')}
 /* ---------- customer statement ---------- */

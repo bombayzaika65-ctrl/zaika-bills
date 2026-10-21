@@ -40,7 +40,7 @@ nav button.on{color:var(--ac);font-weight:700}
 #ov{position:fixed;inset:0;background:var(--bg);overflow:auto;z-index:9;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 30px}
 #ov img{width:100%;max-width:640px;display:block;margin:10px auto;border:1px solid var(--bd);background:#fff}
 .bt{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:640px;margin:auto}
-#r2{display:flex;margin-top:0}#r2>button{flex:1}#r2>button[hidden]{display:none}
+#r2,#r3{margin-top:8px}#r3[hidden]{display:none}
 #sr{display:flex;justify-content:center;align-items:center;gap:6px;margin:6px auto 0;max-width:640px;color:var(--mu)}
 #sr button{background:none;border:0;padding:8px 10px;font-size:14px;color:var(--mu)}#sr #bd{color:#c0392b}#sr button[hidden],#sr span[hidden]{display:none}
 #sg{position:absolute;left:0;right:0;top:100%;z-index:5;background:var(--card);border:1px solid var(--bd);border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.3);max-height:230px;overflow:auto}#sg div{padding:12px;border-bottom:1px solid var(--bd)}
@@ -83,8 +83,8 @@ nav button.on{color:var(--ac);font-weight:700}
 <div id="ov" hidden>
 <div class="bt" style="margin-bottom:6px"><button class="g" id="oc">← Close</button><button class="gd" id="bs">Share image</button></div>
 <img id="pimg" alt="Invoice">
-<div class="bt" id="r2"><button class="g" id="bw">WhatsApp text</button>
-<button class="b" id="bsv">Save bill</button><button class="gd" id="bnw">New bill</button></div>
+<div class="bt" id="r2"><button class="g" id="bw">WhatsApp text</button><button class="g" id="bpd">📄 Share PDF</button></div>
+<div class="bt" id="r3"><button class="b" id="bsv">Save bill</button><button class="gd" id="bnw">New bill</button></div>
 <div id="hp" class="card" style="max-width:640px;margin:12px auto">
 <div id="bal" style="font-size:18px;font-weight:700;margin-bottom:4px"></div>
 <label>Add payment (Toman)</label><div class="r"><input id="pa" inputmode="numeric"><button class="gd s" id="pb">Add</button></div>
@@ -111,9 +111,9 @@ if(n<=0)return'Zero';let s='';[[1e9,'Billion'],[1e6,'Million'],[1e3,'Thousand']]
 const newDraft=()=>({no:null,date:today(),name:'',phone:'',items:[],dt:'t',dv:0,del:0,rec:0,saved:false});
 let d=newDraft(),cur=null,mode='',cv=null,CL=[],ci=-1;
 /* ---------- invoice drawing ---------- */
-function draw(b){
-const NAVY='#1b2a41',RED='#A11D21',GR='#6b7587',LN='#d5d9e3',t=calc(b),it=b.items,RH=88,ty=440,te=ty+55+RH*Math.max(it.length,1),by=te+30,fy=by+330,bt=fy+50,H=Math.max(1205,bt+207),K=1240/852;
-const c=document.createElement('canvas');c.width=1240;c.height=Math.round(H*K);const x=c.getContext('2d');x.scale(K,K);x.fillStyle='#fff';x.fillRect(0,0,852,H);
+function draw(b,full){
+const NAVY='#1b2a41',RED='#A11D21',GR='#6b7587',LN='#d5d9e3',t=calc(b),it=b.items,RH=60,ty=440,te=ty+55+RH*Math.max(it.length,1),by=te+30,fy=by+330,bt=fy+50,H=Math.max(1040,bt+207),K=full?1240/852:Math.min(1240/852,1600/H);
+const c=document.createElement('canvas');c.width=Math.round(852*K);c.height=Math.round(H*K);const x=c.getContext('2d');x.scale(K,K);x.fillStyle='#fff';x.fillRect(0,0,852,H);
 const T=(s,X,Y,f,col,al)=>{x.font=f;x.fillStyle=col;x.textAlign=al||'left';x.fillText(s,X,Y)};
 const L=(a,b2,c2,d2,col,lw)=>{x.strokeStyle=col;x.lineWidth=lw||1.2;x.beginPath();x.moveTo(a,b2);x.lineTo(c2,d2);x.stroke()};
 const F=(s,mw,f)=>{x.font=f;const o=s;while(s.length>1&&x.measureText(s).width>mw)s=s.slice(0,-1);return s===o?s:s.trim()+'…'};
@@ -155,11 +155,26 @@ return c}
 function waText(b){const t=calc(b);return 'Bombay Zaika - Invoice #'+(b.no||S.next)+'\nDate: '+dmy(b.date)+'\nCustomer: '+(b.name||'-')+'\n\n'+b.items.map((i,k)=>(k+1)+'. '+i.n+' x'+i.q+' @ '+fmt(i.p)+' = '+fmt(i.q*i.p)).join('\n')+'\n\nSub total: '+fmt(t.sub)+'\nDiscount: '+fmt(t.dc)+'\nDelivery: '+fmt(b.del)+'\nTotal: '+fmt(t.total)+' Toman\nReceived: '+fmt(b.rec)+'\nBalance due: '+fmt(t.bal)+' Toman\n\nThank you!'}
 /* ---------- overlay ---------- */
 const DELTXT='🗑 Delete';
-function openInv(b,m){cur=b;mode=m;$('ov').hidden=false;$('bsv').hidden=$('bnw').hidden=m!=='new';$('hp').hidden=m!=='hist';$('be').hidden=$('bd').hidden=m!=='hist';$('sr').children[1].hidden=$('sr').children[3].hidden=m!=='hist';$('bsv').textContent=b.saved?'Saved ✓ (update)':'Save bill';$('bd').textContent=DELTXT;$('pa').value='';upf();refInv();$('ov').scrollTop=0}
+function openInv(b,m){cur=b;mode=m;$('ov').hidden=false;$('bsv').hidden=$('bnw').hidden=$('r3').hidden=m!=='new';$('hp').hidden=m!=='hist';$('be').hidden=$('bd').hidden=m!=='hist';$('sr').children[1].hidden=$('sr').children[3].hidden=m!=='hist';$('bsv').textContent=b.saved?'Saved ✓ (update)':'Save bill';$('bd').textContent=DELTXT;$('pa').value='';upf();refInv();$('ov').scrollTop=0}
 function refInv(){cv=cur.stmt?drawStmt(cur):draw(cur);$('pimg').src=cv.toDataURL('image/png')}
 $('oc').onclick=()=>{$('ov').hidden=true;tab(cur_tab)};
 $('bs').onclick=()=>cv.toBlob(async bl=>{const f=new File([bl],(cur.stmt?'statement-'+cur.name:'invoice-'+(cur.no||S.next))+'.png',{type:'image/png'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Invoice'});return}}catch(e){if(e.name==='AbortError')return}toast('Press and hold the image to save or share')},'image/png');
-$('bp').onclick=()=>{refInv();window.print()};
+$('bp').onclick=()=>{refInv();$('pimg').src=(cur.stmt?drawStmt(cur,1):draw(cur,1)).toDataURL('image/png');window.print()};
+async function pdfBlob(cv){
+const jb=await new Promise(r=>cv.toBlob(r,'image/jpeg',.95)),jd=new Uint8Array(await jb.arrayBuffer());
+const W=595.28,ih=W*cv.height/cv.width,PH=Math.max(841.89,ih),te=new TextEncoder(),parts=[],off=[];let len=0;
+const add=u=>{parts.push(u);len+=u.length},S=t=>add(te.encode(t)),o=(n,fn)=>{off[n]=len;S(n+' 0 obj\n');fn();S('endobj\n')};
+S('%PDF-1.4\n');
+o(1,()=>S('<</Type/Catalog/Pages 2 0 R>>\n'));
+o(2,()=>S('<</Type/Pages/Kids[3 0 R]/Count 1>>\n'));
+o(3,()=>S('<</Type/Page/Parent 2 0 R/MediaBox[0 0 '+W+' '+PH.toFixed(2)+']/Resources<</XObject<</I 4 0 R>>>>/Contents 5 0 R>>\n'));
+o(4,()=>{S('<</Type/XObject/Subtype/Image/Width '+cv.width+'/Height '+cv.height+'/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length '+jd.length+'>>\nstream\n');add(jd);S('\nendstream\n')});
+const cs='q '+W+' 0 0 '+ih.toFixed(2)+' 0 '+(PH-ih).toFixed(2)+' cm /I Do Q';
+o(5,()=>S('<</Length '+cs.length+'>>\nstream\n'+cs+'\nendstream\n'));
+const xr=len;S('xref\n0 6\n0000000000 65535 f \n');for(let i=1;i<=5;i++)S(String(off[i]).padStart(10,'0')+' 00000 n \n');
+S('trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n'+xr+'\n%%EOF');
+return new Blob(parts,{type:'application/pdf'})}
+$('bpd').onclick=async()=>{try{const bl=await pdfBlob(cur.stmt?drawStmt(cur,1):draw(cur,1)),f=new File([bl],(cur.stmt?'statement-'+cur.name:'invoice-'+(cur.no||S.next))+'.pdf',{type:'application/pdf'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Invoice'});return}}catch(e){if(e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('PDF saved')}catch(e){toast('Could not make the PDF')}};
 $('bw').onclick=()=>{const n=(cur.phone||'').replace(/\D/g,'').replace(/^00/,''),a=document.createElement('a');a.href='https://wa.me/'+n+'?text='+encodeURIComponent(cur.stmt?stText(cur):waText(cur));a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove()};
 $('bsv').onclick=()=>{if(!cur.items.length)return toast('Add at least one item');if(!cur.saved){cur.no=S.next++;cur.saved=true;S.bills.push(cur);S.orders=S.orders.filter(o=>o.oid!==cur.oid)}else if(cur.edit){const i=S.bills.findIndex(x=>x.no===cur.no);if(i>=0)S.bills[i]=cur;cur.edit=false}save();refInv();$('bsv').textContent='Saved ✓ (update)';toast('Saved as invoice #'+cur.no)};
 $('bnw').onclick=()=>{d=newDraft();loadForm();$('ov').hidden=true;tab(0)};
@@ -232,12 +247,12 @@ function rnc(i){const n=$('rn').value.trim(),k=CL[i].bills[0].name.trim().toLowe
 /* ---------- customer statement ---------- */
 function stm(i){const c=CL[i],u=c.bills.filter(b=>calc(b).bal>0).sort((a,b)=>a.date.localeCompare(b.date)||a.no-b.no),ph=(c.bills.find(b=>b.phone)||{}).phone||'';openInv({stmt:1,name:c.name,phone:ph,bills:u,items:[],dt:'t',dv:0,del:0,rec:0,date:today()},'stmt')}
 function stText(s){let t=0;const l=s.bills.map(b=>{const k=calc(b);t+=k.bal;return dmy(b.date)+' | Inv #'+b.no+' | '+b.items.map(i=>i.q+'x '+i.n).join(', ')+' | Balance: '+fmt(k.bal)}).join('\n');return 'Bombay Zaika - Unpaid bills\nCustomer: '+(s.name||'-')+'\n\n'+l+'\n\nTotal balance due: '+fmt(t)+' Toman\n\nCard No.: 6104 3389 0641 6678\nSheba No.: IR82 0120 0200 0000 9516 2833 09\nCard Holder: صبافاطمه خضر اونیا'}
-function drawStmt(s){
-const NAVY='#1b2a41',RED='#A11D21',GR='#6b7587',LN='#d5d9e3',bl=s.bills,RH=62,ty=440,te=ty+55+RH*Math.max(bl.length,1),by=te+30,fe=by+175,H=fe+260,K=1240/852;
-const base=draw({name:'',date:today(),items:[],dt:'t',dv:0,del:0,rec:0,no:0});
-const c=document.createElement('canvas');c.width=1240;c.height=Math.round(H*K);const x=c.getContext('2d');x.scale(K,K);x.fillStyle='#fff';x.fillRect(0,0,852,H);
+function drawStmt(s,full){
+const NAVY='#1b2a41',RED='#A11D21',GR='#6b7587',LN='#d5d9e3',bl=s.bills,RH=62,ty=440,te=ty+55+RH*Math.max(bl.length,1),by=te+30,fe=by+175,H=fe+260,K=full?1240/852:Math.min(1240/852,1600/H);
+const base=draw({name:'',date:today(),items:[],dt:'t',dv:0,del:0,rec:0,no:0},true);
+const c=document.createElement('canvas');c.width=Math.round(852*K);c.height=Math.round(H*K);const x=c.getContext('2d');x.scale(K,K);x.fillStyle='#fff';x.fillRect(0,0,852,H);
 x.drawImage(base,0,0,1240,Math.round(236*K),0,0,852,236);
-x.drawImage(base,0,Math.round(943*K),1240,Math.round(235*K),0,fe,852,235);
+x.drawImage(base,0,Math.round(915*K),1240,Math.round(235*K),0,fe,852,235);
 const T=(a,X,Y,f,col,al)=>{x.font=f;x.fillStyle=col;x.textAlign=al||'left';x.fillText(a,X,Y)};
 const L=(a,b2,c2,d2,col,lw)=>{x.strokeStyle=col;x.lineWidth=lw||1.2;x.beginPath();x.moveTo(a,b2);x.lineTo(c2,d2);x.stroke()};
 const F=(a,mw,f)=>{x.font=f;const o=a;while(a.length>1&&x.measureText(a).width>mw)a=a.slice(0,-1);return a===o?a:a.trim()+'…'};

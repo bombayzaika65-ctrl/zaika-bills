@@ -77,6 +77,7 @@ nav button.on{color:var(--ac);font-weight:700}
 </section>
 <section id="t4" hidden><div id="ol"></div></section>
 <section id="t5" hidden><div class="card" id="dtot"></div><div id="dli"></div><div class="card"><label>Add delivery man</label><div class="r"><input id="dn" placeholder="Name"><button class="gd s" id="da">Add</button></div></div></section>
+<div id="ver" style="text-align:center;color:var(--mu);font-size:12px;padding:6px 0 2px">Version 12 · tap to check for update</div>
 </main>
 <nav id="nv"><button class="on"><b>🧾</b>New bill</button><button><b>📜</b>History</button><button><b>👥</b>Customers</button><button><b>🍽</b>Menu</button><button><b>📦</b>Orders</button><button><b>🛵</b>Delivery</button></nav>
 </div>
@@ -296,5 +297,6 @@ function tab(i){cur_tab=i;renderBk();[0,1,2,3,4,5].forEach(k=>{$('t'+k).hidden=k
 try{const t=localStorage.getItem('bzt');if(t)document.documentElement.dataset.theme=t}catch(e){}
 $('th').onclick=()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches,n=dark?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('bzt',n)}catch(e){}};
 loadForm();
+$('ver').onclick=async()=>{toast('Checking for update…');try{const r=await navigator.serviceWorker.getRegistration();if(r)await r.update()}catch(e){}setTimeout(()=>location.reload(),600)};
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>

@@ -45,7 +45,7 @@ nav button.on{color:var(--ac);font-weight:700}
 #sr button{background:none;border:0;padding:8px 10px;font-size:14px;color:var(--mu)}#sr #bd{color:#c0392b}#sr button[hidden],#sr span[hidden]{display:none}
 #sg{position:absolute;left:0;right:0;top:100%;z-index:5;background:var(--card);border:1px solid var(--bd);border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.3);max-height:230px;overflow:auto}#sg div{padding:12px;border-bottom:1px solid var(--bd)}
 .dot b::after{content:'';display:inline-block;width:10px;height:10px;background:#e53935;border-radius:50%;margin-left:2px;vertical-align:top}
-.tag{font-size:11px;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle;color:#fff}.tag.pk{background:#2e7d5b}.tag.dl{background:#A11D21}
+.tag{font-size:11px;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle;color:#fff}.tag.pk{background:#2e7d5b}.tag.tm{background:#8a6a1f;white-space:nowrap;display:inline-block;margin-top:2px}.tag.dl{background:#A11D21}
 #ts{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:20px;z-index:20;font-size:14px}
 @media print{@page{size:A4;margin:0}body>*:not(#ov){display:none!important}#ov{position:static;padding:0}#ov>*:not(img){display:none!important}#ov img{border:0;margin:0;max-width:none;width:100%}}
 </style></head><body>
@@ -54,7 +54,7 @@ nav button.on{color:var(--ac);font-weight:700}
 <main>
 <section id="t0">
 <div class="card"><label>Customer name</label><div style="position:relative"><input id="cn" autocomplete="off"><div id="sg" hidden></div></div>
-<div class="r"><div><label>Date (delivery day)</label><input id="cd" type="date"></div><div><label>WhatsApp (with country code)</label><input id="cp" type="tel" placeholder="+98…"></div></div><label>Order type</label><select id="ot"><option value="d">Delivery</option><option value="p">Pick-up</option></select></div>
+<div class="r"><div><label>Date (delivery day)</label><input id="cd" type="date"></div><div><label>WhatsApp (with country code)</label><input id="cp" type="tel" placeholder="+98…"></div></div><div class="r"><div><label>Order type</label><select id="ot"><option value="d">Delivery</option><option value="p">Pick-up</option></select></div><div><label>Time (optional)</label><input id="tm" type="time"></div></div></div>
 <div class="card"><h3>Menu</h3><div class="chips" id="mb"></div></div>
 <div class="card"><h3>Items</h3><div id="il"></div>
 <label>Custom item</label><div class="r"><input id="cin" placeholder="Name" style="flex:2"><input id="ciq" inputmode="numeric" placeholder="Qty" style="max-width:64px"><input id="cip" inputmode="numeric" placeholder="Price"><button class="gd s" id="ca">Add</button></div></div>
@@ -77,7 +77,7 @@ nav button.on{color:var(--ac);font-weight:700}
 </section>
 <section id="t4" hidden><div id="ol"></div></section>
 <section id="t5" hidden><div class="card"><label style="margin-top:0">Deliveries on</label><input type="date" id="dday"><div id="dres" style="margin-top:8px"></div></div><div class="card" id="dtot"></div><div id="dli"></div><div class="card"><label>Add delivery man</label><div class="r"><input id="dn" placeholder="Name"><button class="gd s" id="da">Add</button></div></div></section>
-<div id="ver" style="text-align:center;color:var(--mu);font-size:12px;padding:6px 0 2px">Version 15 · tap to check for update</div>
+<div id="ver" style="text-align:center;color:var(--mu);font-size:12px;padding:6px 0 2px">Version 16 · tap to check for update</div>
 </main>
 <nav id="nv"><button class="on"><b>🧾</b>New bill</button><button><b>📜</b>History</button><button><b>👥</b>Customers</button><button><b>🍽</b>Menu</button><button><b>📦</b>Orders</button><button><b>🛵</b>Delivery</button></nav>
 </div>
@@ -191,7 +191,7 @@ function ri(i){d.items.splice(i,1);renderItems()}
 function addM(i){const m=S.menu[i],f=d.items.find(x=>x.n===m.n&&x.p===m.p);f?f.q++:d.items.push({n:m.n,q:1,p:m.p});renderItems()}
 function renderNew(){renderBk();$('mb').innerHTML=S.menu.map((m,i)=>`<button class="chip" onclick="addM(${i})">${E(m.n)}<small>${fmt(m.p)}</small></button>`).join('')||'<small>No menu items yet.</small>';
 $('dm').innerHTML='<option value="">Select…</option>'+[...S.men,...(d.dm&&!S.men.includes(d.dm)?[d.dm]:[])].map(n=>`<option>${E(n)}</option>`).join('');$('dm').value=d.dm||'';renderItems()}
-function loadForm(){$('cn').value=d.name;$('cd').value=d.date;$('cp').value=d.phone;$('dt').value=d.dt;$('dv').value=fv(d.dv);$('dl').value=fv(d.del);$('rc').value=fv(d.rec);$('pf').checked=!!d.pif;$('ot').value=d.ot||'d';$('dbox').hidden=d.ot==='p';renderNew()}
+function loadForm(){$('cn').value=d.name;$('cd').value=d.date;$('cp').value=d.phone;$('dt').value=d.dt;$('dv').value=fv(d.dv);$('dl').value=fv(d.del);$('rc').value=fv(d.rec);$('pf').checked=!!d.pif;$('ot').value=d.ot||'d';$('tm').value=d.tm||'';$('dbox').hidden=d.ot==='p';renderNew()}
 const names=()=>{const m={};[...S.bills,...S.orders].forEach(b=>{if(b.name&&b.name.trim())m[b.name.trim().toLowerCase()]=b.name.trim()});return Object.values(m)};
 function fillPh(f){const k=d.name.trim().toLowerCase();if(k&&(f||!d.phone)){const b=[...S.bills].reverse().find(b=>b.name.trim().toLowerCase()===k&&b.phone);if(b){d.phone=b.phone;$('cp').value=b.phone}}}
 let SG=[];
@@ -201,6 +201,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('#cn,#sg'))$('sg').hi
 $('cn').oninput=e=>{d.name=e.target.value;fillPh();sug()};$('cn').onfocus=sug;
 $('dm').onchange=e=>d.dm=e.target.value;
 $('ot').onchange=e=>{d.ot=e.target.value;if(d.ot==='p'){d.del=0;d.dm='';$('dl').value='';$('dm').value=''}$('dbox').hidden=d.ot==='p';updTot()};
+$('tm').oninput=$('tm').onchange=e=>{d.tm=e.target.value||''};
 $('cd').oninput=e=>d.date=e.target.value||today();$('cp').oninput=e=>d.phone=e.target.value;
 $('dt').onchange=e=>{d.dt=e.target.value;updTot()};
 [['dv','dv'],['dl','del'],['rc','rec']].forEach(([i,k])=>$(i).oninput=e=>{d[k]=num(e.target.value);if(k==='rec'){d.pif=false;$('pf').checked=false}updTot()});
@@ -233,8 +234,9 @@ $('brs').onclick=()=>{if($('brs').textContent!=='Restore backup'){try{const j=JS
 /* ---------- orders ---------- */
 $('so').onclick=()=>{if(d.saved)return toast('This is already a saved bill. Tap Clear / start a new bill first');if(!d.items.length)return toast('Add at least one item');if(!d.oid)d.oid=Date.now();const i=S.orders.findIndex(o=>o.oid===d.oid);i<0?S.orders.push(d):S.orders[i]=d;save();toast('Order saved - see Orders tab');d=newDraft();loadForm()};
 let od=-1;
-function orow(o){return `<div class="row"><div class="gr" onclick="lo(${o.oid})"><b>${E(o.name||'Walk-in')} <span class="tag ${o.ot==='p'?'pk':'dl'}">${o.ot==='p'?'PICK-UP':'DELIVERY'}</span></b><small>${o.ot==='p'?'Pick-up':'Deliver'} ${dmy(o.date)} · ${E(o.items.map(i=>i.q+'× '+i.n).join(', '))}</small></div><div class="rt"><b>${fmt(calc(o).total)}</b></div><button class="x" onclick="dro(${o.oid})">${od===o.oid?'Sure?':'×'}</button></div>`}
-function renderOrders(){const l=[...S.orders].sort((a,b)=>a.date.localeCompare(b.date)),main=prepList(l)+l.map(orow).join('');$('ol').innerHTML=main||'<p style="color:var(--mu)">No orders waiting. On New bill, add the customer and items, then tap Save as order.</p>'}
+const tf=t=>{const[h,m]=t.split(':').map(Number);return (h%12||12)+':'+String(m).padStart(2,'0')+' '+(h<12?'AM':'PM')};
+function orow(o){return `<div class="row"><div class="gr" onclick="lo(${o.oid})"><b>${E(o.name||'Walk-in')} <span class="tag ${o.ot==='p'?'pk':'dl'}">${o.ot==='p'?'PICK-UP':'DELIVERY'}</span>${o.tm?` <span class="tag tm">🕔 ${tf(o.tm)}</span>`:''}</b><small>${o.ot==='p'?'Pick-up':'Deliver'} ${dmy(o.date)} · ${E(o.items.map(i=>i.q+'× '+i.n).join(', '))}</small></div><div class="rt"><b>${fmt(calc(o).total)}</b></div><button class="x" onclick="dro(${o.oid})">${od===o.oid?'Sure?':'×'}</button></div>`}
+function renderOrders(){const l=[...S.orders].sort((a,b)=>a.date.localeCompare(b.date)||((a.tm?0:1)-(b.tm?0:1))||(a.tm||'').localeCompare(b.tm||'')),main=prepList(l)+l.map(orow).join('');$('ol').innerHTML=main||'<p style="color:var(--mu)">No orders waiting. On New bill, add the customer and items, then tap Save as order.</p>'}
 function lo(id){d=S.orders.find(o=>o.oid===id);loadForm();tab(0);toast('Order loaded - check it, then preview the invoice')}
 function dro(id){if(od===id){S.orders=S.orders.filter(o=>o.oid!==id);od=-1;save()}else od=id;renderOrders()}
 /* ---------- edit bill, prep list, backup reminder ---------- */
